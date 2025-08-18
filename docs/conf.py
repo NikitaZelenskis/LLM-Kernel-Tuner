@@ -2,7 +2,7 @@ import os
 import sys
 
 os.environ["SPHINX_BUILD"] = "1"
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../.."))
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -30,6 +30,17 @@ extensions = [
 
 spelling_lang = 'en_US'
 spelling_word_list_filename = ['spelling_wordlist.txt', 'spelling_namelist.txt']
+
+autodoc_mock_imports = [
+    "kernel_tuner",
+    "python-dotenv",
+    "langchain-core",
+    "langchain-openai",
+    "langgraph",
+    "libclang",
+    "pycuda",
+    "numpy",
+]
 
 autodoc_typehints = "both" 
 autoclass_member_order = 'bysource'
