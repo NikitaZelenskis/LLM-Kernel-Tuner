@@ -78,10 +78,6 @@ print(best_params)
 
 For more detailed information, please refer to the [documentation](https://nikitazelenskis.github.io/LLM-Kernel-Tuner/).
 
-## License
-
-This project is licensed under the MIT License. Please note that the license is not explicitly specified in the `pyproject.toml` file.
-
 ## Examples
 
 You can find more examples in the `examples` directory:
