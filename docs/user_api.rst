@@ -1,10 +1,10 @@
 API documentation
 =================
 
-.. autoclass:: llm_kernel_tuner.llm_kernel_transformer.LLMKernelTransformer
+.. autoclass:: llm_kernel_tuner.LLMKernelTransformer
    :members: make_kernel_tunable, add_test
 
-.. autoclass:: llm_kernel_tuner.tunable_kernel.TunableKernel
+.. autoclass:: llm_kernel_tuner.TunableKernel
    :members: copy, tune, test, get_arg_position
 
 .. autoclass:: llm_kernel_tuner.tuning_strategies.BaseTuningStrategy
