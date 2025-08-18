@@ -1,7 +1,7 @@
 import os
 import sys
 
-
+os.environ["SPHINX_BUILD"] = "1"
 sys.path.insert(0, os.path.abspath(".."))
 # Configuration file for the Sphinx documentation builder.
 #
@@ -65,12 +65,3 @@ html_static_path = ['_static']
 
 numfig = True
 
-# autodoc_mock_imports = [
-#     "pycuda",
-#     "kernel_tuner",
-#     "langgraph",
-#     "langchain_core",
-#     "langchain_openai",
-#     "libclang",
-#     "dotenv",          # module name is 'dotenv' not 'python-dotenv'
-# ]
