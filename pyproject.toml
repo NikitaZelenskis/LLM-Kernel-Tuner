@@ -7,8 +7,8 @@ name = "llm_kernel_tuner"
 version = "0.1.0"
 description = "A package for automated kernel tuning with LLMs"
 authors = ["Nikita Zelenskis <n.zelenskis@umail.leidenuniv.nl>"]
-#license = "MIT"
-#readme = "README.md"
+license = "Apache-2.0"
+readme = "README.md"
 
 
 [tool.poetry.dependencies]
