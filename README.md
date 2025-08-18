@@ -12,16 +12,34 @@ LLM Kernel Tuner is a framework that helps with tuning and optimizing kernels by
 
 ## Installation
 
-You can install LLM Kernel Tuner from the local directory after you have cloned it:
+First, clone the repository:
 
 ```bash
-pip install .
+git clone https://github.com/NikitaZelenskis/LLM-Kernel-Tuner.git
+cd LLM-Kernel-Tuner
 ```
 
-Alternatively, you can install it directly from the GitHub repository:
+This project uses [Poetry](https.python-poetry.org/) for dependency management.
+
+### CUDA Requirement
+
+This project requires a CUDA-enabled GPU. You must install the `pycuda` dependency with:
 
 ```bash
-pip install git+https://github.com/NikitaZelenskis/LLM-Kernel-Tuner.git
+poetry install --with cuda
+```
+
+### With Documentation
+
+To install dependencies for building the documentation, run:
+
+```bash
+poetry install --with docs
+```
+
+You can also combine options:
+```bash
+poetry install --with cuda,docs
 ```
 
 ## Getting Started
