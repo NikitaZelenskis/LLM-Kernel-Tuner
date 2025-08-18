@@ -53,3 +53,13 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
 
 numfig = True
+
+autodoc_mock_imports = [
+    "pycuda",
+    "kernel_tuner",
+    "langgraph",
+    "langchain_core",
+    "langchain_openai",
+    "libclang",
+    "dotenv",          # module name is 'dotenv' not 'python-dotenv'
+]

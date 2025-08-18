@@ -63,7 +63,7 @@ Example Usage
     """
 
     # Configure LLM to use tool calling for structured output
-    llm = ChatOpenAI(model="gpt-4o")
+    llm = ChatOpenAI(model="gpt-5")
     kernel_transformer = LLMKernelTransformer(
         kernel_string, 
         llm,

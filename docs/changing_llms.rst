@@ -49,7 +49,7 @@ This allows you to use a wider variety of models, including many open-source one
     """
 
     # This model supports tool calling natively, but force it to use emulation
-    model = ChatOpenAI(model="gpt-4o")
+    model = ChatOpenAI(model="gpt-5")
     
     kernel_transformer = LLMKernelTransformer(
         kernel_string,
@@ -63,7 +63,7 @@ For more detailed information on this mechanism, see the :ref:`structured_output
 OpenAI
 ^^^^^^
 
-LLM Kernel Tuner uses OpenAI's GPT-4o model by default and therefore ``langchain-openai`` package should already be installed.
+LLM Kernel Tuner uses OpenAI's GPT-5 model by default and therefore ``langchain-openai`` package should already be installed.
 However if you want to change the model in use you can do so like this:
 
 .. code-block:: python

@@ -10,7 +10,7 @@ Here is a simple example of how it can be used for a simple ``matrixMultiply`` k
     from llm_kernel_tuner import LLMKernelTransformer
     from langchain_openai import ChatOpenAI
 
-    model = ChatOpenAI(model_name='gpt4o-latest')
+    model = ChatOpenAI(model_name='gpt-5')
 
     kernel_string = """
     __global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_height, int B_width) {
@@ -34,7 +34,7 @@ Here is a simple example of how it can be used for a simple ``matrixMultiply`` k
     print(best_params)
 
 
-| The example above will use OpenAI's gpt4o model to tune the kernel.
+| The example above will use OpenAI's gpt-5 model to tune the kernel.
 | You can chose any `langchain <https://python.langchain.com/docs/introduction/>`_ chat model, most commonly used models can be found `here <https://python.langchain.com/docs/integrations/chat/>`_.
 | By default LLM Kernel Tuner uses :ref:`Autonomous Tuning Strategy <autonomous_tuning_strategy>` and :ref:`Naive Tester Strategy <naive_testing_strategy>`. But you can change these strategies to a :ref:`different tuning strategy <Tuning strategies>`, :ref:`create your own tuning strategy<custom_tuning_strategy>` or :ref:`create your own testing strategy <naive_testing_strategy>`.
 

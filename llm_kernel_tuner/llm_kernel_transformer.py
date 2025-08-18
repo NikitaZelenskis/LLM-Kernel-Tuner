@@ -52,7 +52,7 @@ class LLMKernelTransformer:
     Args:
         kernel (str): Kernel device code that will be tuned 
         llm (BaseChatModel, optional): The language model instance to use for LLM interactions. 
-            Defaults to ChatOpenAI(model="gpt-4o").
+            Defaults to ChatOpenAI(model="gpt-5").
         tuning_strategy (BaseTuningStrategy, optional): The strategy for tuning the kernel's parameters. 
             Defaults to AutonomousTuningStrategy().
         tests (List[KernelTest], optional): A list of initial tests to validate the kernel's correctness. 
@@ -108,7 +108,7 @@ class LLMKernelTransformer:
         self.kernel_info = self._create_kernel_info(kernel_code, device, clang_args, cuda_gpu_arch, time_per_test)
         self.kernel = TunableKernel(self.kernel_code, self.kernel_info)
 
-        base_llm = llm if llm is not None else ChatOpenAI(model="gpt-4o")
+        base_llm = llm if llm is not None else ChatOpenAI(model="gpt-5")
         
         if strip_thinking_output:
             # Could maybe be done with a Langchains Runnable (LCEL) in the future? 
