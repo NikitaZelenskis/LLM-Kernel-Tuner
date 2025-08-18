@@ -1,0 +1,17 @@
+/venv/*
+/venv-linux/*
+pyvenv.cgf
+.env
+.vscode/*
+**/__pycache__/**
+examples/output/*
+*.egg-info
+poetry.lock
+
+# Sphinx build directory (generated files)
+docs/_build/
+docs/_autosummary/
+
+# Sphinx cached files
+docs/.doctrees/
+docs/.buildinfo

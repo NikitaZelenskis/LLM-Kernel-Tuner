@@ -1,0 +1,31 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "llm_kernel_tuner"
+version = "0.1.0"
+description = "A package for automated kernel tuning with LLMs"
+authors = ["Nikita Zelenskis <n.zelenskis@umail.leidenuniv.nl>"]
+#license = "MIT"
+#readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+kernel_tuner = "^1.0"
+python-dotenv = "^1.0.1"
+langchain-core = "^0.3.33"
+langchain-openai = "^0.3.3"
+langgraph = "^0.2.69"
+libclang = "^18.1.1"
+pycuda = "^2024.1.2"
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+sphinx = "^8.2.0"
+sphinxcontrib-bibtex = "^2.6.3"
+setuptools = "^75.8.0"
+sphinx-rtd-theme = "^3.0.2"
+sphinxcontrib-spelling = "^8.0.1"
