@@ -25,17 +25,6 @@ logger = get_logger(__name__)
 class SubprocessTimeoutError(Exception):
     pass
 
-class ProblemSizeState(TypedDict):
-    input: np.ndarray
-    problem_size: Union[int, Tuple[int, ...]]
-    kernel: TunableKernel
-    messages: List[BaseMessage]
-
-class OutputsState(TypedDict):
-    kernel: TunableKernel
-    messages: List[BaseMessage]
-    output_variables: List[str]    
-
 
 _RETRY_POLICY_DEFAULT_SENTINEL = object()  # Sentinel object for default retry_policy
 
