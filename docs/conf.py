@@ -1,5 +1,8 @@
 import os
 import sys
+
+from sphinx_pyproject import SphinxConfig
+
 sys.path.insert(0, os.path.abspath(".."))
 # Configuration file for the Sphinx documentation builder.
 #
@@ -8,6 +11,10 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+config = SphinxConfig(
+    "../pyproject.toml",
+)
 
 project = 'llm_kernel_tuner'
 copyright = '2025, Nikita Zelenskis'
@@ -49,6 +56,14 @@ master_doc = "index"
 import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
+
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "NikitaZelenskis",  # Username
+    "github_repo": "LLM-Kernel-Tuner",  # Repo name
+    "github_version": "main",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
+}
 
 html_static_path = ['_static']
 
