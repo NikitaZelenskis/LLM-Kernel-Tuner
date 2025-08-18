@@ -1,7 +1,6 @@
 import os
 import sys
 
-from sphinx_pyproject import SphinxConfig
 
 sys.path.insert(0, os.path.abspath(".."))
 # Configuration file for the Sphinx documentation builder.
@@ -12,9 +11,6 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-config = SphinxConfig(
-    "../pyproject.toml",
-)
 
 project = 'llm_kernel_tuner'
 copyright = '2025, Nikita Zelenskis'
