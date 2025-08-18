@@ -37,9 +37,9 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry --version
 
-      - name: Install only docs dependencies
+      - name: Install dependencies
         run: |
-          poetry install --only docs
+          poetry install --with docs
 
       - name: Install system dependency for spelling (optional)
         if: ${{ always() }}

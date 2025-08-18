@@ -31,16 +31,16 @@ extensions = [
 spelling_lang = 'en_US'
 spelling_word_list_filename = ['spelling_wordlist.txt', 'spelling_namelist.txt']
 
-autodoc_mock_imports = [
-    "kernel_tuner",
-    "python-dotenv",
-    "langchain-core",
-    "langchain-openai",
-    "langgraph",
-    "libclang",
-    "pycuda",
-    "numpy",
-]
+# autodoc_mock_imports = [
+#     "kernel_tuner",
+#     "python-dotenv",
+#     "langchain-core",
+#     "langchain-openai",
+#     "langgraph",
+#     "libclang",
+#     "pycuda",
+#     "numpy",
+# ]
 
 autodoc_typehints = "both" 
 autoclass_member_order = 'bysource'
