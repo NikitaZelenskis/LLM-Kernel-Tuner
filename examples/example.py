@@ -26,9 +26,10 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_
 }
 """
 
-kernel_transformer = LLMKernelTransformer(kernel_string, model)
-tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
-print("Final kernel:")
-print(tuned_kernel.code)
-print("Best params:")
-print(best_params)
+if __name__ == "__main__":
+    kernel_transformer = LLMKernelTransformer(kernel_string, model, clang_args=['-resource-dir', '/usr/lib/clang/18'])
+    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    print("Final kernel:")
+    print(tuned_kernel.code)
+    print("Best params:")
+    print(best_params)

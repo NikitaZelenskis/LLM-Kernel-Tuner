@@ -26,19 +26,19 @@ Here is a simple example of how it can be used for a simple ``matrixMultiply`` k
     }
     """
 
-    kernel_transformer = LLMKernelTransformer(kernel_string, model)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
-    print("Final kernel:")
-    print(tuned_kernel.code)
-    print("Best params:")
-    print(best_params)
+    if __name__ == "__main__":
+        kernel_transformer = LLMKernelTransformer(kernel_string, model)
+        tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+        print("Final kernel:")
+        print(tuned_kernel.code)
+        print("Best params:")
+        print(best_params)
 
 
 | The example above will use OpenAI's gpt-5 model to tune the kernel.
 | You can chose any `langchain <https://python.langchain.com/docs/introduction/>`_ chat model, most commonly used models can be found `here <https://python.langchain.com/docs/integrations/chat/>`_.
 | By default LLM Kernel Tuner uses :ref:`Autonomous Tuning Strategy <autonomous_tuning_strategy>` and :ref:`Naive Tester Strategy <naive_testing_strategy>`. But you can change these strategies to a :ref:`different tuning strategy <Tuning strategies>`, :ref:`create your own tuning strategy<custom_tuning_strategy>` or :ref:`create your own testing strategy <naive_testing_strategy>`.
 
-.. note::
    LLM Kernel Tuner uses the `clang` library to parse CUDA kernel code. If the Python `clang` bindings cannot automatically find your `libclang.so` (or equivalent) file, you may need to set the ``LIBCLANG_PATH`` environment variable. For example:
 
    .. code-block:: bash
@@ -47,4 +47,4 @@ Here is a simple example of how it can be used for a simple ``matrixMultiply`` k
 
    Replace the path with the actual location of the `libclang` shared library on your system.
 
-   Similairly ``clang_args`` can be specified when creating :class:`LLMKernelTransformer <llm_kernel_tuner.LLMKernelTransformer>` like so ``kernel_transformer = LLMKernelTransformer(..., clang_args=['your', 'args'])``
+   Similarly ``clang_args`` can be specified when creating :class:`LLMKernelTransformer <llm_kernel_tuner.LLMKernelTransformer>` like so ``kernel_transformer = LLMKernelTransformer(..., clang_args=['your', 'args'])``. If you are getting the error ``fatal error: '__clang_cuda_runtime_wrapper.h' file not found``, you may need to specify the resource directory: ``clang_args=['-resource-dir', '/usr/lib/clang/18']`` (replace with your actual clang version and path).
