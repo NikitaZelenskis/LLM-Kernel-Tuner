@@ -5,6 +5,7 @@ from llm_kernel_tuner.retry import create_retry_wrapper, RetryPolicy, WrongArgum
 from llm_kernel_tuner.llm_kernel_tuner_logger import get_logger
 from llm_kernel_tuner.prompts import autonomous_strategy_prompts
 from llm_kernel_tuner.structured_output import get_structured_llm
+from llm_kernel_tuner.performance_tracker import PerformanceTracker
 from typing import Optional, List, Dict, Any, TypedDict, Union
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -419,6 +420,40 @@ class AutonomousTuningStrategy(BaseTuningStrategy):
     def _past_steps_to_string(self, past_steps: List[str]) -> str:
         return "\n".join([f"- {step}" for step in past_steps])
 
+    def _generate_step_description(self, current_step: str, state: AutonomousStrategyState) -> str:
+        """Generate a descriptive step description for performance tracking.
+        
+        This method creates a human-readable description of the optimization step
+        that includes context about breakdown levels and replanning if applicable.
+        
+        Args:
+            current_step: The current optimization step being executed
+            state: The current autonomous strategy state
+            
+        Returns:
+            A formatted step description string
+        """
+        description_parts = []
+        
+        # Add the base step description
+        description_parts.append(current_step)
+        
+        # Add context about breakdown level if applicable
+        if self.breakdown_steps and state["plan_breakdown_counts"]:
+            breakdown_level = state["plan_breakdown_counts"][0]
+            if breakdown_level > 0:
+                description_parts.append(f"(breakdown level {breakdown_level})")
+        
+        # Add context about replanning if applicable
+        if self.with_replanning and state["replan_count"] > 0:
+            description_parts.append(f"(replan iteration {state['replan_count']})")
+        
+        # Add step number context
+        total_completed_steps = len(state["past_steps"])
+        step_number = total_completed_steps + 1
+        
+        return f"Step {step_number}: {' '.join(description_parts)}"
+
 
 
     def _test_kernel(self, new_kernel: TunableKernel, tune_params: Dict[str, List[Any]], restrictions: List[str], state: AutonomousStrategyState) -> AutonomousStrategyState:
@@ -447,10 +482,23 @@ class AutonomousTuningStrategy(BaseTuningStrategy):
                 
                 logger.info(f"New best kernel has been chosen, kernel code: ```{new_kernel.code}``` with execution time: {tune_result.time}")
                 
+                # Update kernel state
                 state["kernel"] = new_kernel
                 state["kernel"].best_time = tune_result.time
                 state['best_params'] = tune_result.best_tune_params
                 state["curr_tune_params"] = tune_params
+                
+                # Record successful optimization step
+                step_description = self._generate_step_description(current_step, state)
+                self._record_successful_step(
+                    step_description=step_description,
+                    old_kernel=curr_kernel,
+                    new_kernel=new_kernel,
+                    tune_params=tune_params,
+                    restrictions=restrictions,
+                    best_params=tune_result.best_tune_params,
+                    state=state
+                )
             else:
                 # Kernel rejected due to insufficient improvement
                 improvement_percentage = self._calculate_improvement_percentage(curr_kernel.best_time, tune_result.time)

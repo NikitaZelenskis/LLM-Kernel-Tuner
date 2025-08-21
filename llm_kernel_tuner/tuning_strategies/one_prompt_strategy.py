@@ -138,10 +138,27 @@ class OnePromptTuningStrategy(BaseTuningStrategy):
 
         tune_result = self._run_tests(candidate_kernel, curr_tune_params, tests, restrictions)
         logger.info(f"Kernel passed all tests")
-        if tune_result.time is not None and (curr_kernel.best_time is None or tune_result.time < curr_kernel.best_time):
+        
+        # Update candidate kernel with the test results
+        candidate_kernel.best_time = tune_result.time
+        
+        # Check if the new kernel should be accepted based on performance threshold
+        if tune_result.time is not None and self._should_accept_kernel(curr_kernel, tune_result.time):
             logger.info(f"New kernel is faster than the old kernel")
+            
+            # Record the successful optimization step
+            step_description = "One-prompt kernel optimization"
+            self._record_successful_step(
+                step_description=step_description,
+                old_kernel=curr_kernel,
+                new_kernel=candidate_kernel,
+                tune_params=curr_tune_params,
+                restrictions=restrictions,
+                best_params=tune_result.best_tune_params,
+                state=state
+            )
+            
             state["kernel"] = candidate_kernel
-            state["kernel"].best_time = tune_result.time
             state['best_params'] = tune_result.best_tune_params
             return state
         

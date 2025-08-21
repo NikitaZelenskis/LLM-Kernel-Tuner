@@ -3,7 +3,8 @@ from llm_kernel_tuner.tunable_kernel import TuneResult, TunableKernel
 from llm_kernel_tuner.kernel_test import KernelTest
 from llm_kernel_tuner.retry import RetryPolicy, default_tuner_retry_policy, create_retry_wrapper, RestrictionCheckError
 from llm_kernel_tuner.prompts import tuning_strategy_prompts
-from typing import Optional, List, Dict, Any, overload, TypedDict
+from llm_kernel_tuner.performance_tracker import PerformanceTracker, PerformanceStep
+from typing import Optional, List, Dict, Any, overload, TypedDict, TYPE_CHECKING
 from abc import ABC, abstractmethod
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
@@ -11,7 +12,11 @@ from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel, Field
 import re
 import json
+from datetime import datetime
 from llm_kernel_tuner.structured_output import get_structured_llm
+
+if TYPE_CHECKING:
+    from llm_kernel_tuner.tuning_state import State
 
 logger = get_logger(__name__)
 
@@ -420,3 +425,61 @@ class BaseTuningStrategy(ABC):
             logger.debug(f"Rejecting kernel: improvement {improvement_percentage:.2f}% < threshold {threshold}%")
             
         return meets_threshold
+
+    def _record_successful_step(self, step_description: str, old_kernel: TunableKernel, 
+                              new_kernel: TunableKernel, tune_params: Dict[str, List[Any]], 
+                              restrictions: List[str], best_params: Dict[str, Any], 
+                              state: 'State') -> None:
+        """Record a successful optimization step in the performance tracker.
+        
+        This method creates a PerformanceStep record and adds it to the performance
+        tracker when a kernel optimization step is accepted based on the performance
+        threshold. It captures comprehensive information about the optimization.
+        
+        Args:
+            step_description: Human-readable description of the optimization step
+            old_kernel: The previous kernel before this optimization step
+            new_kernel: The new optimized kernel after this step
+            tune_params: The tunable parameters used for this optimization
+            restrictions: Parameter restrictions applied during tuning
+            best_params: The best parameter values found for this kernel
+            state: The tuning state containing the performance tracker
+            
+        Note:
+            This method should only be called when a kernel optimization step
+            has been accepted (i.e., meets the performance threshold).
+            The performance tracker is initialized by the LLMKernelTransformer.
+        """
+        
+        # Calculate improvement percentage
+        old_time = old_kernel.best_time
+        new_time = new_kernel.best_time
+        
+        if new_time is None:
+            logger.warning("Cannot record step: new kernel has no execution time")
+            return
+            
+        improvement_percentage = self._calculate_improvement_percentage(
+            old_time if old_time is not None else 0.0, 
+            new_time
+        )
+        
+        # Create performance step record
+        step = PerformanceStep(
+            step_description=step_description,
+            kernel_code=new_kernel.code,
+            old_execution_time=old_time,
+            new_execution_time=new_time,
+            improvement_percentage=improvement_percentage,
+            tunable_parameters=tune_params.copy(),
+            restrictions=restrictions.copy(),
+            best_tune_params=best_params.copy(),
+            timestamp=datetime.now()
+        )
+        
+        # Record the step
+        state['performance_tracker'].record_step(step)
+        
+        logger.info(f"Recorded successful optimization step: {step_description} "
+                   f"(improvement: {improvement_percentage:.2f}%)")
+

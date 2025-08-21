@@ -274,6 +274,7 @@ class ExplicitTuningStrategy(BaseTuningStrategy):
             raise NoCodeError("Could not extract kernel")
 
         curr_tune_params = state["curr_tune_params"] | state['tuning_steps'][0].tune_params
+        current_tuning_step = state['tuning_steps'][0]
 
         restrictions = self._ask_restrictions(kernel.code, curr_tune_params)
         #if tests fail they will raise an exception
@@ -289,11 +290,24 @@ class ExplicitTuningStrategy(BaseTuningStrategy):
             else:
                 logger.info(f"First kernel accepted with execution time: {tune_result.time:.6f}s")
             
+            # Record successful optimization step
+            old_kernel = state["kernel"]
+            kernel.best_time = tune_result.time
+            step_description = self._generate_step_description(current_tuning_step, state['completed_tuning_steps'])
+            self._record_successful_step(
+                step_description=step_description,
+                old_kernel=old_kernel,
+                new_kernel=kernel,
+                tune_params=curr_tune_params,
+                restrictions=restrictions,
+                best_params=tune_result.best_tune_params,
+                state=state
+            )
+            
             logger.info(f"New best kernel has been chosen, kernel code: ```{kernel.code}``` with execution time: {tune_result.time}")
             state['best_params'] = tune_result.best_tune_params
             state['curr_tune_params'] = curr_tune_params
             state["kernel"] = kernel
-            state["kernel"].best_time = tune_result.time
         elif tune_result.time is not None:
             # Kernel was rejected due to insufficient improvement
             improvement_percentage = self._calculate_improvement_percentage(kernel.best_time, tune_result.time)
@@ -380,3 +394,36 @@ class ExplicitTuningStrategy(BaseTuningStrategy):
 
     def _wrap_code(self, code: str) -> str:
         return f"```CUDA\n{code}\n```"
+
+    def _generate_step_description(self, tuning_step: TuningStep, completed_steps: Dict[str, bool]) -> str:
+        """Generate a human-readable description for a tuning step.
+        
+        This method creates a descriptive string for the optimization step that includes
+        the step ID, a brief description of the optimization technique, and information
+        about dependencies if applicable.
+        
+        Args:
+            tuning_step: The TuningStep being executed
+            completed_steps: Dictionary tracking which steps have been completed
+            
+        Returns:
+            A human-readable description of the optimization step
+        """
+        # Create base description from step ID
+        step_name = tuning_step.id.replace('_', ' ').title()
+        
+        # Add dependency information if this step has dependencies
+        dependency_info = ""
+        if tuning_step.depends_on:
+            completed_deps = [dep for dep in tuning_step.depends_on if completed_steps.get(dep, False)]
+            if completed_deps:
+                dep_names = [dep.replace('_', ' ').title() for dep in completed_deps]
+                if len(dep_names) == 1:
+                    dependency_info = f" (building on {dep_names[0]})"
+                else:
+                    dependency_info = f" (building on {', '.join(dep_names[:-1])} and {dep_names[-1]})"
+        
+        # Create comprehensive description
+        description = f"{step_name} Optimization{dependency_info}"
+        
+        return description

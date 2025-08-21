@@ -5,6 +5,7 @@ from llm_kernel_tuner.prompts import transformer_prompts
 from llm_kernel_tuner.testing_strategies.naive_llm_tester import NaiveLLMTester
 from llm_kernel_tuner.testing_strategies.base_testing_strategy import BaseTestingStrategy
 from llm_kernel_tuner.tuning_state import State
+from llm_kernel_tuner.performance_tracker import PerformanceTracker
 from llm_kernel_tuner.retry import RetryPolicy, NoCodeError, InvalidProblemSize, InvalidOutputVariables, default_transformer_retry_policy, create_retry_wrapper
 from llm_kernel_tuner.structured_output import StructuredOutputType, get_structured_llm
 from llm_kernel_tuner.thinking_stripper import ThinkingStripperWrapper
@@ -263,6 +264,10 @@ class LLMKernelTransformer:
         state["best_params"] = tune_result.best_tune_params
         state["kernel"].best_time = tune_result.time
 
+        # Set baseline time in performance tracker for total improvement calculation
+        performance_tracker = state["performance_tracker"]
+        performance_tracker.set_baseline_time(tune_result.time)
+
         logger.info(f"Initial kernel time: {tune_result.time}, with following tuning parameters: {tune_result.best_tune_params}")
 
         return state
@@ -309,9 +314,17 @@ class LLMKernelTransformer:
             "llm": self.llm,
             "messages": [],
             "curr_tune_params": self.default_tune_params,
+            "performance_tracker": PerformanceTracker(),
         }, {"recursion_limit": self.max_recursion_limit})
         logger.info("Done tuning kernel.")
         logger.info(f'Final best performaing kernel: `\n{final_state["kernel"]}\n` with following tunable parameters: `\n{final_state["best_params"]}\n`')
+        
+        # Display performance overview after tuning completion
+        performance_tracker = final_state["performance_tracker"]
+        overview = performance_tracker.generate_overview()
+        print(overview)
+        logger.info("Performance overview displayed.")
+        
         return final_state["kernel"], final_state["best_params"]
 
     def _get_kernel_info(self) -> CompiledStateGraph:
