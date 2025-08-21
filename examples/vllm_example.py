@@ -163,13 +163,16 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_
         kernel_transformer = LLMKernelTransformer(kernel_string, model)
 
         print("\n--- Starting Kernel Tuning ---", flush=True)
-        tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+        tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
         print("\n--- Tuning Complete ---", flush=True)
         print("\nFinal tuned kernel code:")
         print(tuned_kernel.code)
         print("\nBest parameters found:")
         print(best_params)
+        print(f"\nOptimization steps completed: {len(performance_tracker.steps)}")
+        if performance_tracker.has_improvements():
+            print(f"Total performance improvement: {performance_tracker.get_total_improvement():.2f}%")
 
         print("\nScript finished successfully.", flush=True)
 

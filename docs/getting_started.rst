@@ -28,11 +28,14 @@ Here is a simple example of how it can be used for a simple ``matrixMultiply`` k
 
     if __name__ == "__main__":
         kernel_transformer = LLMKernelTransformer(kernel_string, model)
-        tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+        tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
         print("Final kernel:")
         print(tuned_kernel.code)
         print("Best params:")
         print(best_params)
+        print(f"Optimization steps: {len(performance_tracker.steps)}")
+        if performance_tracker.has_improvements():
+            print(f"Total improvement: {performance_tracker.get_total_improvement():.2f}%")
 
 
 | The example above will use OpenAI's gpt-5 model to tune the kernel.

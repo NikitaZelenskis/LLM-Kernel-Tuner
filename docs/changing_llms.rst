@@ -91,7 +91,7 @@ However if you want to change the model in use you can do so like this:
     model = ChatOpenAI(model_name=openAI_model_name)
 
     kernel_transformer = LLMKernelTransformer(kernel_string, model)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
 | The example above will use the latest GPT-4.5 preview model to tune ``matrixMultiply`` kernel defined in ``kernel_string``.
 | Make sure that ``OPENAI_API_KEY`` is set.
@@ -127,7 +127,7 @@ Anthropic
     model = ChatAnthropic(model_name=anthropic_model_name, timeout=None, stop=None)
 
     kernel_transformer = LLMKernelTransformer(kernel_string, model)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
 The example above will use Anthropic's latest version of Claude Sonnet 3.7 to tune ``matrixMultiply`` kernel defined in ``kernel_string``.
 
@@ -172,12 +172,15 @@ llama.cpp with Python Bindings
     )
 
     kernel_transformer = LLMKernelTransformer(kernel_string, model)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
     print("Final kernel:")
     print(tuned_kernel.code)
     print("Best params:")
     print(best_params)
+    print(f"Optimization steps: {len(performance_tracker.steps)}")
+    if performance_tracker.has_improvements():
+        print(f"Total improvement: {performance_tracker.get_total_improvement():.2f}%")
 
 
 vLLM
@@ -345,13 +348,16 @@ This example also handles errors in the subprocess.
             kernel_transformer = LLMKernelTransformer(kernel_string, model)
 
             print("\n--- Starting Kernel Tuning ---", flush=True)
-            tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+            tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
             print("\n--- Tuning Complete ---", flush=True)
             print("\nFinal tuned kernel code:")
             print(tuned_kernel.code)
             print("\nBest parameters found:")
             print(best_params)
+            print(f"\nOptimization steps: {len(performance_tracker.steps)}")
+            if performance_tracker.has_improvements():
+                print(f"Total improvement: {performance_tracker.get_total_improvement():.2f}%")
 
             print("\nScript finished successfully.", flush=True)
 
@@ -411,11 +417,14 @@ If you have the server already running you could omit the start subprocess and j
 
 
     kernel_transformer = LLMKernelTransformer(kernel_string, model)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
 
     print("Final kernel:")
     print(tuned_kernel.code)
     print("Best params:")
     print(best_params)
+    print(f"Optimization steps: {len(performance_tracker.steps)}")
+    if performance_tracker.has_improvements():
+        print(f"Total improvement: {performance_tracker.get_total_improvement():.2f}%")
 
 You can find the list of all supported vLLM models here: `<https://docs.vllm.ai/en/latest/models/supported_models.html#model-support-policy>`_

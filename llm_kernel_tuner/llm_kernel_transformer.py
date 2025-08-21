@@ -314,12 +314,12 @@ class LLMKernelTransformer:
         return testing_subgraph.compile()
 
     
-    def make_kernel_tunable(self) -> Tuple[TunableKernel, Dict[str, Any]]:
+    def make_kernel_tunable(self) -> Tuple[TunableKernel, Dict[str, Any], PerformanceTracker]:
         """
         | Transforms the kernel to make it tunable.
         
         Returns:
-            Tuple[TunableKernel, Dict[str, Any]]: The transformed kernel as :class:`TunableKernel` and the best tuning parameters as a dictionary
+            Tuple[TunableKernel, Dict[str, Any], PerformanceTracker]: The transformed kernel as :class:`TunableKernel`, the best tuning parameters as a dictionary, and the performance tracker containing optimization steps
         """
         graph = self.workflow.compile()
         final_state = graph.invoke({
@@ -340,7 +340,7 @@ class LLMKernelTransformer:
         print(overview)
         logger.info("Performance overview displayed.")
         
-        return final_state["kernel"], final_state["best_params"]
+        return final_state["kernel"], final_state["best_params"], performance_tracker
 
     def _get_kernel_info(self) -> CompiledStateGraph:
         

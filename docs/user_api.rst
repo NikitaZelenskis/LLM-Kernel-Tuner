@@ -23,6 +23,11 @@ API documentation
    :members: get_test_from_code
 
 .. autoclass:: llm_kernel_tuner.tuning_state.State
+
+.. autoclass:: llm_kernel_tuner.PerformanceTracker
+   :members: record_step, set_baseline_time, get_total_improvement, generate_overview, has_improvements
+
+.. autoclass:: llm_kernel_tuner.PerformanceStep
    
 .. autoclass:: llm_kernel_tuner.retry.RetryPolicy
 

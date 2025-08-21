@@ -35,8 +35,13 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_
     # you can change resource dir to a non default one 
     # kernel_transformer = LLMKernelTransformer(kernel_string, llm, clang_args=['-resource-dir', '/data/s2622157/llvm/LLVM-20.1.3-Linux-X64/lib/clang/20'])
     kernel_transformer = LLMKernelTransformer(kernel_string, llm)
-    tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
     print("Final kernel:")
     print(tuned_kernel.code)
     print("Best params:")
     print(best_params)
+    
+    # Access performance tracking information
+    print(f"\nOptimization steps completed: {len(performance_tracker.steps)}")
+    if performance_tracker.has_improvements():
+        print(f"Total performance improvement: {performance_tracker.get_total_improvement():.2f}%")

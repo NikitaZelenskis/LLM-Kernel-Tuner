@@ -11,6 +11,7 @@ This project was developed as part of a master thesis research. The thesis provi
 ## Features
 
 *   **Automated Kernel Tuning**: Automatically tune and optimize your kernels using LLMs.
+*   **Performance Tracking**: Comprehensive tracking of optimization steps with detailed performance analysis.
 *   **Extensible**: Easily extend the framework with your own tuning and testing strategies.
 *   **Flexible**: Supports various LLMs through `langchain`.
 
@@ -54,28 +55,34 @@ Here is a simple example of how to use LLM Kernel Tuner for a simple `matrixMult
 from llm_kernel_tuner import LLMKernelTransformer
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(model_name='gpt-5')
+if __name__ == "__main__":
+    model = ChatOpenAI(model_name='gpt-5')
 
-kernel_string = """
-__global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_height, int B_width) {
-    int col = threadIdx.x + blockDim.x * blockIdx.x;
-    int row = threadIdx.y + blockDim.y * blockIdx.y;
-    if (col < B_width && row < A_height) {
-        float sum = 0;
-        for (int k = 0; k < A_width; ++k) {
-            sum += A[row * A_width + k] * B[k * B_width + col];
+    kernel_string = """
+    __global__ void matrixMultiply(float *A, float *B, float *C, int A_width, int A_height, int B_width) {
+        int col = threadIdx.x + blockDim.x * blockIdx.x;
+        int row = threadIdx.y + blockDim.y * blockIdx.y;
+        if (col < B_width && row < A_height) {
+            float sum = 0;
+            for (int k = 0; k < A_width; ++k) {
+                sum += A[row * A_width + k] * B[k * B_width + col];
+            }
+            C[row * B_width + col] = sum;
         }
-        C[row * B_width + col] = sum;
     }
-}
-"""
+    """
 
-kernel_transformer = LLMKernelTransformer(kernel_string, model)
-tuned_kernel, best_params = kernel_transformer.make_kernel_tunable()
-print("Final kernel:")
-print(tuned_kernel.code)
-print("Best params:")
-print(best_params)
+    kernel_transformer = LLMKernelTransformer(kernel_string, model)
+    tuned_kernel, best_params, performance_tracker = kernel_transformer.make_kernel_tunable()
+    print("Final kernel:")
+    print(tuned_kernel.code)
+    print("Best params:")
+    print(best_params)
+    
+    # Access performance tracking information
+    print(f"Optimization steps: {len(performance_tracker.steps)}")
+    if performance_tracker.has_improvements():
+        print(f"Total improvement: {performance_tracker.get_total_improvement():.2f}%")
 ```
 
 ## Documentation
@@ -85,5 +92,7 @@ For more detailed information, please refer to the [documentation](https://nikit
 ## Examples
 
 You can find more examples in the `examples` directory:
+*   [Basic Example](examples/example.py)
+*   [Performance Tracking Example](examples/performance_tracking_example.py)
 *   [Llama CPP Example](examples/llama_cpp_example.py)
 *   [vLLM Example](examples/vllm_example.py)

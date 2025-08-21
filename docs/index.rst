@@ -18,6 +18,7 @@ LLM Kernel Tuner documentation
    testing_strategies
    retry_policy
    structured_output
+   performance_tracking
 
 
 .. toctree::
