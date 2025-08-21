@@ -26,4 +26,4 @@ LLM Kernel Tuner documentation
 
    user_api
    prompts_api
-   design
+   thesis_research
