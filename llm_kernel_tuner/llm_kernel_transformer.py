@@ -103,19 +103,7 @@ class LLMKernelTransformer:
                 - ``performance_threshold=0.5``: Requires at least 0.5% improvement (default)
                 - ``performance_threshold=1.0``: Requires at least 1.0% improvement (more conservative)
                 - ``performance_threshold=0.0``: Accepts any improvement, however small
-            
-            Usage examples:
-                ```python
-                # Default threshold (0.5%)
-                transformer = LLMKernelTransformer(kernel_code)
-                
-                # Conservative threshold (2% improvement required)
-                transformer = LLMKernelTransformer(kernel_code, performance_threshold=2.0)
-                
-                # Accept any improvement
-                transformer = LLMKernelTransformer(kernel_code, performance_threshold=0.0)
-                ```
-            
+
             Defaults to 0.5.
         verbosity (Literal["none", "debug", "info", "warning", "all"], optional): Controls the verbosity 
             of logging output. Options are:
