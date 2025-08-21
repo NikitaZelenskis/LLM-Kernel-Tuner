@@ -9,7 +9,7 @@ from llm_kernel_tuner.performance_tracker import PerformanceTracker
 from llm_kernel_tuner.retry import RetryPolicy, NoCodeError, InvalidProblemSize, InvalidOutputVariables, default_transformer_retry_policy, create_retry_wrapper
 from llm_kernel_tuner.structured_output import StructuredOutputType, get_structured_llm
 from llm_kernel_tuner.thinking_stripper import ThinkingStripperWrapper
-from typing import List, Tuple, Dict, Any, Optional, Union
+from typing import List, Tuple, Dict, Any, Optional, Union, Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, BaseMessage, SystemMessage, AIMessage
@@ -20,6 +20,8 @@ from pydantic import BaseModel, Field
 import json
 import clang.cindex as cl
 import os
+import logging
+import sys
 
 
 logger = get_logger(__name__)
@@ -115,6 +117,15 @@ class LLMKernelTransformer:
                 ```
             
             Defaults to 0.5.
+        verbosity (Literal["none", "debug", "info", "warning", "all"], optional): Controls the verbosity 
+            of logging output. Options are:
+            - "none": No logging output (uses NullHandler)
+            - "debug": Shows debug, info, warning, and error messages
+            - "info": Shows info, warning, and error messages (default)
+            - "warning": Shows only warning and error messages
+            - "all": Shows all logging levels including debug
+            
+            Defaults to "info".
     """
     default_tune_params:Dict[str, Any] = {'block_size_x': [256]}
     _default_cuda_gpu_arch = "sm_70"
@@ -133,6 +144,7 @@ class LLMKernelTransformer:
                  thinking_pattern: str = r"<think>.*?</think>\s*",
                  structured_output_type: StructuredOutputType = StructuredOutputType.DEFAULT,
                  performance_threshold: float = 0.5,
+                 verbosity: Literal["none", "debug", "info", "warning", "all"] = "info",
                  ):
         # Add basic validation assertion for performance_threshold
         assert isinstance(performance_threshold, (int, float)) and performance_threshold >= 0, \
@@ -141,6 +153,9 @@ class LLMKernelTransformer:
         # Add input validation for performance_threshold
         if not isinstance(performance_threshold, (int, float)) or performance_threshold < 0:
             raise ValueError("performance_threshold must be a non-negative number")
+        
+        # Set up logging based on verbosity level
+        self._setup_logging(verbosity)
         
         self.kernel_code = kernel_code
         self.kernel_info = self._create_kernel_info(kernel_code, device, clang_args, cuda_gpu_arch, time_per_test, performance_threshold)
@@ -454,6 +469,46 @@ class LLMKernelTransformer:
             raise ValueError("LLM returned a unexpected message")
         
         return answerMessage
+
+    def _setup_logging(self, verbosity: Literal["none", "debug", "info", "warning", "all"]) -> None:
+        """
+        Set up logging configuration based on the specified verbosity level.
+        
+        Args:
+            verbosity: The verbosity level for logging output
+        """
+        # Get the root logger for the llm_kernel_tuner package
+        logger = logging.getLogger('llm_kernel_tuner')
+        
+        # Remove any existing handlers to avoid duplicates
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+        
+        if verbosity == "none":
+            # Use NullHandler to suppress all output
+            logger.addHandler(logging.NullHandler())
+            logger.setLevel(logging.CRITICAL + 1)  # Effectively disable all logging
+        else:
+            # Set up console handler for output
+            console_handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            console_handler.setFormatter(formatter)
+            
+            # Map verbosity levels to logging levels
+            level_mapping = {
+                "debug": logging.DEBUG,
+                "info": logging.INFO,
+                "warning": logging.WARNING,
+                "all": logging.DEBUG,  # "all" is same as debug
+            }
+            
+            log_level = level_mapping[verbosity]
+            logger.setLevel(log_level)
+            console_handler.setLevel(log_level)
+            logger.addHandler(console_handler)
+            
+            # Prevent propagation to avoid duplicate messages
+            logger.propagate = False
 
     def add_test(self, test: KernelTest):
         """
