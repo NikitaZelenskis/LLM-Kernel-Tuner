@@ -334,3 +334,89 @@ class BaseTuningStrategy(ABC):
                     return False
         
         return True
+
+    def _calculate_improvement_percentage(self, old_time: float, new_time: float) -> float:
+        """Calculate the performance improvement percentage between old and new execution times.
+        
+        Args:
+            old_time (float): The previous execution time
+            new_time (float): The new execution time
+            
+        Returns:
+            float: The improvement percentage using formula: ((old_time - new_time) / old_time) * 100
+                  Positive values indicate improvement, negative values indicate regression
+                  
+        Note:
+            Handles edge cases for zero or very small time values by returning 0.0
+            when old_time is zero or near-zero to avoid division by zero.
+        """
+        # Handle edge case where old_time is zero or very small
+        if old_time <= 1e-10:  # Very small threshold to handle floating point precision
+            logger.debug(f"Edge case: old_time ({old_time}) is zero or near-zero, returning 0.0% improvement")
+            return 0.0
+        
+        # Handle edge case where new_time is negative (invalid)
+        if new_time < 0:
+            logger.warning(f"Edge case: new_time ({new_time}) is negative, treating as no improvement")
+            return -100.0  # Treat as significant regression
+            
+        improvement_percentage = ((old_time - new_time) / old_time) * 100
+        
+        # Log when there's no improvement or regression
+        if new_time >= old_time:
+            logger.debug(f"No improvement: new_time ({new_time}) >= old_time ({old_time}), improvement: {improvement_percentage:.2f}%")
+        
+        return improvement_percentage
+
+    def _meets_performance_threshold(self, old_time: float, new_time: float, threshold: float) -> bool:
+        """Check if the performance improvement meets the specified threshold.
+        
+        Args:
+            old_time (float): The previous execution time
+            new_time (float): The new execution time  
+            threshold (float): The minimum improvement percentage required
+            
+        Returns:
+            bool: True if the calculated improvement percentage meets or exceeds the threshold,
+                  False otherwise
+        """
+        improvement_percentage = self._calculate_improvement_percentage(old_time, new_time)
+        return improvement_percentage >= threshold
+
+    def _should_accept_kernel(self, current_kernel: TunableKernel, new_time: float) -> bool:
+        """Determine if a new kernel should be accepted based on performance threshold.
+        
+        Args:
+            current_kernel (TunableKernel): The current best kernel
+            new_time (float): The execution time of the new kernel candidate
+            
+        Returns:
+            bool: True if the new kernel should be accepted, False otherwise
+            
+        Note:
+            Always accepts the first kernel (when current_kernel.best_time is None).
+            For subsequent kernels, uses threshold comparison to determine acceptance.
+        """
+        # Always accept the first kernel
+        if current_kernel.best_time is None:
+            logger.debug("Accepting first kernel (no previous best_time)")
+            return True
+        
+        # Handle edge case where new_time is invalid
+        if new_time < 0:
+            logger.warning(f"Rejecting kernel with invalid negative execution time: {new_time}")
+            return False
+            
+        # Use threshold comparison for subsequent kernels
+        threshold = current_kernel.kernel_info.performance_threshold
+        old_time = current_kernel.best_time
+        improvement_percentage = self._calculate_improvement_percentage(old_time, new_time)
+        
+        meets_threshold = self._meets_performance_threshold(old_time, new_time, threshold)
+        
+        if meets_threshold:
+            logger.debug(f"Accepting kernel: improvement {improvement_percentage:.2f}% >= threshold {threshold}%")
+        else:
+            logger.debug(f"Rejecting kernel: improvement {improvement_percentage:.2f}% < threshold {threshold}%")
+            
+        return meets_threshold

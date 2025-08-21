@@ -67,6 +67,8 @@ class TunableKernelInfo:
         self.output_variables: List[str]
         """Time per test in seconds"""
         self.time_per_test = 15
+        """Minimum performance improvement threshold as a percentage (default 0.5%)"""
+        self.performance_threshold: float = 0.5
         self.device: int
         self.cuda_gpu_arch: str
         self.clang_args: List[str]

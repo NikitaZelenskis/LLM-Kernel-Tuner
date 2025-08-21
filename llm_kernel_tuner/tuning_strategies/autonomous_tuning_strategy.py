@@ -430,13 +430,34 @@ class AutonomousTuningStrategy(BaseTuningStrategy):
         
         tune_result = self._run_tests(new_kernel, tune_params, state['tests'], restrictions)
         logger.info(f"Kernel passed all tests")
-        if tune_result.time is not None and (curr_kernel.best_time is None or tune_result.time < curr_kernel.best_time):
-            logger.info(f"New best kernel has been chosen, kernel code: ```{new_kernel.code}``` with execution time: {tune_result.time}")
-
-            state["kernel"] = new_kernel
-            state["kernel"].best_time = tune_result.time
-            state['best_params'] = tune_result.best_tune_params
-            state["curr_tune_params"] = tune_params
+        
+        if tune_result.time is not None:
+            # Use threshold-based decision logic
+            should_accept = self._should_accept_kernel(curr_kernel, tune_result.time)
+            
+            if should_accept:
+                # Calculate improvement percentage for logging
+                if curr_kernel.best_time is not None:
+                    improvement_percentage = self._calculate_improvement_percentage(curr_kernel.best_time, tune_result.time)
+                    threshold = curr_kernel.kernel_info.performance_threshold
+                    logger.info(f"Kernel accepted: improvement {improvement_percentage:.2f}% meets threshold {threshold}%. "
+                              f"Previous time: {curr_kernel.best_time}, new time: {tune_result.time}")
+                else:
+                    logger.info(f"First kernel accepted with execution time: {tune_result.time}")
+                
+                logger.info(f"New best kernel has been chosen, kernel code: ```{new_kernel.code}``` with execution time: {tune_result.time}")
+                
+                state["kernel"] = new_kernel
+                state["kernel"].best_time = tune_result.time
+                state['best_params'] = tune_result.best_tune_params
+                state["curr_tune_params"] = tune_params
+            else:
+                # Kernel rejected due to insufficient improvement
+                improvement_percentage = self._calculate_improvement_percentage(curr_kernel.best_time, tune_result.time)
+                threshold = curr_kernel.kernel_info.performance_threshold
+                logger.info(f"Kernel rejected: improvement {improvement_percentage:.2f}% does not meet threshold {threshold}%. "
+                          f"Current time: {curr_kernel.best_time}")
+        
         state["past_steps"].append(current_step)
         state["plan"] = state["plan"][1:]
         state["plan_breakdown_counts"] = state["plan_breakdown_counts"][1:]

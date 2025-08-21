@@ -86,6 +86,34 @@ class LLMKernelTransformer:
             ``<think>`` tags.
         structured_output_type (StructuredOutputType, optional): The type of structured output format 
             to use for LLM interactions. Defaults to ``StructuredOutputType.DEFAULT``.
+        performance_threshold (float, optional): Minimum performance improvement threshold as a percentage 
+            required for accepting a new kernel version. This prevents accepting kernels with marginal 
+            improvements that may be due to measurement noise or system variability.
+            
+            The improvement percentage is calculated using the formula:
+            ``((old_time - new_time) / old_time) * 100``
+            
+            A new kernel is accepted only if the calculated improvement percentage is greater than 
+            or equal to the threshold value.
+            
+            Examples:
+                - ``performance_threshold=0.5``: Requires at least 0.5% improvement (default)
+                - ``performance_threshold=1.0``: Requires at least 1.0% improvement (more conservative)
+                - ``performance_threshold=0.0``: Accepts any improvement, however small
+            
+            Usage examples:
+                ```python
+                # Default threshold (0.5%)
+                transformer = LLMKernelTransformer(kernel_code)
+                
+                # Conservative threshold (2% improvement required)
+                transformer = LLMKernelTransformer(kernel_code, performance_threshold=2.0)
+                
+                # Accept any improvement
+                transformer = LLMKernelTransformer(kernel_code, performance_threshold=0.0)
+                ```
+            
+            Defaults to 0.5.
     """
     default_tune_params:Dict[str, Any] = {'block_size_x': [256]}
     _default_cuda_gpu_arch = "sm_70"
@@ -103,9 +131,18 @@ class LLMKernelTransformer:
                  strip_thinking_output: bool = False,
                  thinking_pattern: str = r"<think>.*?</think>\s*",
                  structured_output_type: StructuredOutputType = StructuredOutputType.DEFAULT,
+                 performance_threshold: float = 0.5,
                  ):
+        # Add basic validation assertion for performance_threshold
+        assert isinstance(performance_threshold, (int, float)) and performance_threshold >= 0, \
+            "performance_threshold must be a non-negative number"
+        
+        # Add input validation for performance_threshold
+        if not isinstance(performance_threshold, (int, float)) or performance_threshold < 0:
+            raise ValueError("performance_threshold must be a non-negative number")
+        
         self.kernel_code = kernel_code
-        self.kernel_info = self._create_kernel_info(kernel_code, device, clang_args, cuda_gpu_arch, time_per_test)
+        self.kernel_info = self._create_kernel_info(kernel_code, device, clang_args, cuda_gpu_arch, time_per_test, performance_threshold)
         self.kernel = TunableKernel(self.kernel_code, self.kernel_info)
 
         base_llm = llm if llm is not None else ChatOpenAI(model="gpt-5")
@@ -127,7 +164,7 @@ class LLMKernelTransformer:
         self.structured_output_type = structured_output_type
         self.llm.metadata = {"structured_output_type": structured_output_type}
 
-    def _create_kernel_info(self, kernel_code: str, device: int = 0, clang_args: List[str] = [], cuda_gpu_arch: Optional[str] = None, time_per_test: int = 15) -> TunableKernelInfo:
+    def _create_kernel_info(self, kernel_code: str, device: int = 0, clang_args: List[str] = [], cuda_gpu_arch: Optional[str] = None, time_per_test: int = 15, performance_threshold: float = 0.5) -> TunableKernelInfo:
         """
         Returns kernel info object with all values that could be filled in statically.
         Fields that cannot be extracted statically are not filled in (e.g. description, problem_size and output_variables)
@@ -137,6 +174,7 @@ class LLMKernelTransformer:
         kernel_info.device = device
         kernel_info.clang_args = clang_args
         kernel_info.time_per_test = time_per_test
+        kernel_info.performance_threshold = performance_threshold
         if cuda_gpu_arch:
             kernel_info.cuda_gpu_arch = cuda_gpu_arch
         elif pycuda_available and drv is not None:
