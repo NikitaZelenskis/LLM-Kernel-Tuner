@@ -1,12 +1,12 @@
 Performance Tracking
 ===================
 
-LLM Kernel Tuner provides comprehensive performance tracking capabilities that allow you to monitor and analyze the optimization process. The ``make_kernel_tunable()`` method returns a ``PerformanceTracker`` object that contains detailed information about each successful optimization step.
+LLM Kernel Tuner provides comprehensive performance tracking capabilities that allow you to monitor and analyze the optimization process. The :func:`LLMKernelTransformer.make_kernel_tunable() <llm_kernel_tuner.LLMKernelTransformer.make_kernel_tunable>` method returns a :class:`PerformanceTracker <llm_kernel_tuner.PerformanceTracker>` object that contains detailed information about each successful optimization step.
 
 Return Values
 -------------
 
-The ``make_kernel_tunable()`` method returns a tuple with three values:
+The :func:`LLMKernelTransformer.make_kernel_tunable() <llm_kernel_tuner.LLMKernelTransformer.make_kernel_tunable>` method returns a tuple with three values:
 
 .. code-block:: python
 
@@ -14,24 +14,24 @@ The ``make_kernel_tunable()`` method returns a tuple with three values:
 
 Where:
 
-- ``tuned_kernel``: The optimized :class:`TunableKernel` object
+- ``tuned_kernel``: The optimized :class:`TunableKernel <llm_kernel_tuner.TunableKernel>` object
 - ``best_params``: Dictionary containing the best tuning parameters found
-- ``performance_tracker``: :class:`PerformanceTracker` object with optimization history
+- ``performance_tracker``: :class:`PerformanceTracker <llm_kernel_tuner.PerformanceTracker>` object with optimization history
 
 PerformanceTracker Features
 ---------------------------
 
-The ``PerformanceTracker`` provides several useful methods and properties:
+The :class:`PerformanceTracker <llm_kernel_tuner.PerformanceTracker>` provides several useful methods and properties:
 
 **Key Methods:**
 
-- ``get_total_improvement()``: Returns the total performance improvement percentage from baseline
-- ``has_improvements()``: Returns True if any optimization steps were recorded
-- ``generate_overview()``: Creates a detailed formatted report of all optimization steps
+- :func:`get_total_improvement() <llm_kernel_tuner.PerformanceTracker.get_total_improvement>`: Returns the total performance improvement percentage from baseline
+- :func:`has_improvements() <llm_kernel_tuner.PerformanceTracker.has_improvements>`: Returns True if any optimization steps were recorded
+- :func:`generate_overview() <llm_kernel_tuner.PerformanceTracker.generate_overview>`: Creates a detailed formatted report of all optimization steps
 
 **Key Properties:**
 
-- ``steps``: List of :class:`PerformanceStep` objects representing each optimization
+- ``steps``: List of :class:`PerformanceStep <llm_kernel_tuner.PerformanceStep>` objects representing each optimization
 - ``baseline_time``: The initial execution time before any optimizations
 
 Performance Overview Display
@@ -84,6 +84,7 @@ Here's a complete example showing how to use the performance tracking features:
             print(f"Step {i}: {step.step_description}")
             print(f"  Improvement: {step.improvement_percentage:.2f}%")
             print(f"  Execution time: {step.new_execution_time:.6f}s")
+            print(f"Code after this step: \n{step.kernel_code}")
     
     # Generate detailed overview (already displayed during tuning)
     overview = performance_tracker.generate_overview()
@@ -92,7 +93,7 @@ Here's a complete example showing how to use the performance tracking features:
 PerformanceStep Details
 -----------------------
 
-Each optimization step is represented by a :class:`PerformanceStep` object containing:
+Each optimization step is represented by a :class:`PerformanceStep <llm_kernel_tuner.PerformanceStep>` object containing:
 
 - ``step_description``: Human-readable description of the optimization
 - ``kernel_code``: The optimized kernel code after this step

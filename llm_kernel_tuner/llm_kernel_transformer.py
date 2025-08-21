@@ -53,7 +53,7 @@ class LLMKernelTransformer:
     provided strategies and retry policies.
 
     Args:
-        kernel (str): Kernel device code that will be tuned 
+        kernel_code (str): Kernel device code that will be tuned 
         llm (BaseChatModel, optional): The language model instance to use for LLM interactions. 
             Defaults to ChatOpenAI(model="gpt-5").
         tuning_strategy (BaseTuningStrategy, optional): The strategy for tuning the kernel's parameters. 
