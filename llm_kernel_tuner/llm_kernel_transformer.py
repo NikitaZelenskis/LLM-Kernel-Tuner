@@ -100,11 +100,11 @@ class LLMKernelTransformer:
             or equal to the threshold value.
             
             Examples:
-                - ``performance_threshold=0.5``: Requires at least 0.5% improvement (default)
-                - ``performance_threshold=1.0``: Requires at least 1.0% improvement (more conservative)
+                - ``performance_threshold=1.0``: Requires at least 1.0% improvement (default)
+                - ``performance_threshold=2.0``: Requires at least 2.0% improvement (more conservative)
                 - ``performance_threshold=0.0``: Accepts any improvement, however small
 
-            Defaults to 0.5.
+            Defaults to 1.0.
         verbosity (Literal["none", "debug", "info", "warning", "all"], optional): Controls the verbosity 
             of logging output. Options are:
             - "none": No logging output (uses NullHandler)
@@ -131,13 +131,9 @@ class LLMKernelTransformer:
                  strip_thinking_output: bool = False,
                  thinking_pattern: str = r"<think>.*?</think>\s*",
                  structured_output_type: StructuredOutputType = StructuredOutputType.DEFAULT,
-                 performance_threshold: float = 0.5,
+                 performance_threshold: float = 1.0,
                  verbosity: Literal["none", "debug", "info", "warning", "all"] = "info",
                  ):
-        # Add basic validation assertion for performance_threshold
-        assert isinstance(performance_threshold, (int, float)) and performance_threshold >= 0, \
-            "performance_threshold must be a non-negative number"
-        
         # Add input validation for performance_threshold
         if not isinstance(performance_threshold, (int, float)) or performance_threshold < 0:
             raise ValueError("performance_threshold must be a non-negative number")
@@ -168,7 +164,7 @@ class LLMKernelTransformer:
         self.structured_output_type = structured_output_type
         self.llm.metadata = {"structured_output_type": structured_output_type}
 
-    def _create_kernel_info(self, kernel_code: str, device: int = 0, clang_args: List[str] = [], cuda_gpu_arch: Optional[str] = None, time_per_test: int = 15, performance_threshold: float = 0.5) -> TunableKernelInfo:
+    def _create_kernel_info(self, kernel_code: str, device: int = 0, clang_args: List[str] = [], cuda_gpu_arch: Optional[str] = None, time_per_test: int = 15, performance_threshold: float = 1.0) -> TunableKernelInfo:
         """
         Returns kernel info object with all values that could be filled in statically.
         Fields that cannot be extracted statically are not filled in (e.g. description, problem_size and output_variables)
@@ -506,5 +502,6 @@ class LLMKernelTransformer:
             test (KernelTest): test to be added to the testsuite.
         """
         self.tests.append(test)
+
 
 
