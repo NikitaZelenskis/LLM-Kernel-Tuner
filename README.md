@@ -6,7 +6,7 @@ LLM Kernel Tuner is a framework that helps with tuning and optimizing kernels by
 
 ## About This Project
 
-This project was developed as part of a master thesis research. The thesis provides comprehensive analysis and comparison of different tuning strategies and settings for LLM-based kernel optimization. You can find the complete thesis document in [`Master_Thesis.pdf`](Master_Thesis.pdf) which includes detailed experimental results, performance comparisons, and insights into the effectiveness of various approaches.
+This project was developed as part of a master thesis research. The thesis provides comprehensive analysis and comparison of different tuning strategies and settings for LLM-based kernel optimization. You can find the complete thesis document in [`Master_Thesis.pdf`](Master_Thesis.pdf) (official [mirror](https://theses.liacs.nl/3545)) which includes detailed experimental results, performance comparisons, and insights into the effectiveness of various approaches.
 
 ## Features
 
