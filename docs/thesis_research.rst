@@ -16,7 +16,7 @@ The thesis explores the application of LLMs for optimizing GPU kernels, investig
 Thesis Document
 ---------------
 
-The complete thesis document is available in the project repository as `Master_Thesis.pdf <https://raw.githubusercontent.com/NikitaZelenskis/LLM-Kernel-Tuner/main/Master_Thesis.pdf>`_. This document contains:
+The complete thesis document is available in the project repository as `Master_Thesis.pdf <https://raw.githubusercontent.com/NikitaZelenskis/LLM-Kernel-Tuner/main/Master_Thesis.pdf>`_ (`university mirror <https://theses.liacs.nl/3545>`_). This document contains:
 
 * Detailed experimental methodology
 * Comprehensive comparison between different tuning strategies
